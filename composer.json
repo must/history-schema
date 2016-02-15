@@ -1,0 +1,14 @@
+{
+    "name": "visionerp/history-schema",
+    "description": "Provides laravel schema extension. Allows for history tracking table in PostgreSQL",
+    "require": {
+        "illuminate/database": "^5.2"
+    },
+    "authors": [
+        {
+            "name": "Mustapha Ben Chaaben",
+            "email": "mustapha@peaksource.tn"
+        }
+    ],
+    "license": "proprietary"
+}
