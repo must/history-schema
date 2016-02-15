@@ -10,5 +10,6 @@
             "email": "mustapha@peaksource.tn"
         }
     ],
-    "license": "proprietary"
+    "license": "proprietary",
+    "version": "0.0.1"
 }
