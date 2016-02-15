@@ -1,0 +1,6 @@
+# History Schema
+
+Provides laravel schema extension. Allows for history tracking table in PostgreSQL
+
+## License
+Proprietary Peaksource
