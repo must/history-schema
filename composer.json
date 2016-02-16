@@ -2,7 +2,13 @@
     "name": "visionerp/history-schema",
     "description": "Provides laravel schema extension. Allows for history tracking table in PostgreSQL",
     "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "~5.0",
         "illuminate/database": "^5.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~3.0",
+        "orchestra/testbench": "~3.0"
     },
     "authors": [
         {
@@ -12,5 +18,10 @@
     ],
     "license": "proprietary",
     "version": "0.0.1",
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Visionerp\\HistorySchema\\": "src/"
+        }
+    }
 }
