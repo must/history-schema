@@ -48,6 +48,8 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
             $table->string('text2_field');
             $table->integer('integer_field');
         });
+
+        $this->insertThreeRecords('test');
     }
 
     public function tearDown()
@@ -72,10 +74,24 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         DB::table('test')->insert($this->data);
     }
 
+    /**
+     * Update test records
+     *
+     * @param int number of times to update
+     * 
+     * @return void
+     * @author Mustapha Ben Chaaben
+     **/
+    private function updateTestRecords($times = 1)
+    {
+        foreach (range(0, $times-1) as $i) {
+            DB::table('test')
+            ->update(['text2_field' => DB::raw('text2_field || \' updated\'')]);
+        }
+    }
+
     public function testRecordsCountOnInsert()
     {
-        $this->insertThreeRecords('test');
-
         $count = DB::table('test')->count();
 
         $this->assertEquals(3, $count, 'User count doesn\'t match number of users created!');
@@ -83,8 +99,6 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
 
     public function TestLastRecordIdOnInsert()
     {
-        $this->insertThreeRecords('test');
-
         $testRecords = DB::table('test')->get();
 
         $this->assertEquals(3, $testRecords[count($testRecords)-1]->id, 'User Id not right!');
@@ -92,8 +106,6 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
 
     public function testRecordsPrevIdIsNullOnInsert()
     {
-        $this->insertThreeRecords('test');
-
         $testRecords = DB::table('test')->get();
 
         foreach($testRecords as $testRecord) {
@@ -103,8 +115,6 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
 
     public function testRecordsPrevIdIsNotNullOnUpdate()
     {
-        $this->insertThreeRecords('test');
-
         DB::table('test')
             ->update(['text2_field' => DB::raw('text2_field || \' updated\'')]);
 
@@ -117,10 +127,7 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
 
     public function testRecordsPrevIdReferencesFirstOldOnUpdate()
     {
-        $this->insertThreeRecords('test');
-
-        DB::table('test')
-            ->update(['text2_field' => DB::raw('text2_field || \' updated\'')]);
+        $this->updateTestRecords();
 
         $testRecords = DB::table('test_history')->get();
 
@@ -131,10 +138,7 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
 
     public function testRecordsPrevIdReferencesFirstOldWithNullPrevIdAndNextIdOnUpdate()
     {
-        $this->insertThreeRecords('test');
-
-        DB::table('test')
-            ->update(['text2_field' => DB::raw('text2_field || \' updated\'')]);
+        $this->updateTestRecords();
 
         $testRecords = DB::table('test_history')->get();
 
@@ -146,10 +150,7 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
 
     public function testRecordsPrevIdReferencesFirstOldWithOriginalIdEqualsIdOnUpdate()
     {
-        $this->insertThreeRecords('test');
-
-        DB::table('test')
-            ->update(['text2_field' => DB::raw('text2_field || \' updated\'')]);
+        $this->updateTestRecords();
 
         $testRecords = DB::table('test_history')->get();
 
@@ -158,15 +159,75 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         }
     }
 
+    public function testRecordsPrevIdReferencesFirstOldWithNotNullPrevIdAndNextIdOnTwoUpdates()
+    {
+        $this->updateTestRecords(2);
+
+        $testRecords = DB::table('test_history')
+            ->where('id', '>=', 4)
+            ->get();
+
+        foreach($testRecords as $index => $testRecord) {
+            $this->assertNotNull($testRecord->prev_id, 'Prev_id null on first history item');
+            $this->assertNull($testRecord->next_id, 'Next_id not null on first history item');
+        }
+    }
+
+    public function testRecordsOriginalIdReferencesFirstOldOnTwoUpdates()
+    {
+        $this->updateTestRecords(2);
+
+        $testRecords = DB::table('test_history')
+            ->where('id', '>=', 4)
+            ->get();
+
+        foreach($testRecords as $index => $testRecord) {
+            $this->assertEquals($testRecord->id-3, $testRecord->original_id, 'Original id of history record doesn\'t match the id');
+        }
+    }
+
+    public function testRecordsPrevIdReferencesFirstOldOnTwoUpdates()
+    {
+        $this->updateTestRecords(2);
+
+        $testRecords = DB::table('test_history')
+            ->where('id', '>=', 4)
+            ->get();
+
+        foreach($testRecords as $index => $testRecord) {
+            $this->assertEquals($testRecord->id-3, $testRecord->prev_id, 'Prev id of history record doesn\'t match the id');
+        }
+    }
+
+    public function testRecordsNextIdReferencesSecondOldOnTwoUpdates()
+    {
+        $this->updateTestRecords(2);
+
+        $testRecords = DB::table('test_history')
+            ->where('id', '<', 4)
+            ->get();
+
+        foreach($testRecords as $index => $testRecord) {
+            $this->assertEquals($testRecord->id + 3, $testRecord->next_id, 'Next id of history record doesn\'t match the id of newer ones');
+        }
+    }
+
     public function testRecordsCountOnDelete()
     {
-        $this->insertThreeRecords('test');
-
         DB::table('test')->delete();
 
         $count = DB::table('test')->count();
 
-        $this->assertEquals(0, $count, 'User count doesn\'t match number of users created!');
+        $this->assertEquals(0, $count, 'Records count doesn\'t match number of users created!');
+    }
+
+    public function testTrashRecordsCountOnDelete()
+    {
+        DB::table('test')->delete();
+
+        $count = DB::table('test_trash')->count();
+
+        $this->assertEquals(3, $count, 'Trashed records count doesn\'t match number of users created!');
     }
 
 }
