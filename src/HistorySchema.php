@@ -108,19 +108,21 @@ class HistorySchema
      * @return void
      * @author Mustapha Ben Chaaben
      **/
-    public function createHistoryTable($view, callable $callable = NULL)
+    public function createHistoryTable($view, callable $callable = NULL, $timestamped = true)
     {
-        \DB::transaction(function () use ($view, $callable) {
+        \DB::transaction(function () use ($view, $callable, $timestamped) {
             // First of all we create the history table
             // It will be named following the views name (viewName_history)
-            \Schema::create($view . '_history', function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable) {
+            \Schema::create($view . '_history', function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable, $timestamped) {
                 $table->increments('id');
 
                 if(! is_null($callable)) {
                     call_user_func($callable, $table);
                 }
                 
-                $table->timestamps();
+                if($timestamped) {
+                    $table->timestamps();
+                }
 
                 $this->createHistoryReference($table, $view);
                 $table->integer('next_id')->unsigned()->nullable();
@@ -141,27 +143,31 @@ class HistorySchema
 
             // Second of all we create the archived records table
             // It will be named following the views name (viewName_archived)
-            \Schema::create($view . '_trash', function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable) {
+            \Schema::create($view . '_trash', function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable, $timestamped) {
                 $table->increments('id');
 
                 if(! is_null($callable)) {
                     call_user_func($callable, $table);
                 }
 
-                $table->timestamps();
+                if($timestamped) {
+                    $table->timestamps();
+                }
 
                 $this->createHistoryReference($table, $view);
             });
 
             // We create the actual view of data
-            \Schema::create($view, function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable) {
+            \Schema::create($view, function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable, $timestamped) {
                 $table->increments('id');
                 
                 if(! is_null($callable)) {
                     call_user_func($callable, $table);
                 }
 
-                $table->timestamps();
+                if($timestamped) {
+                    $table->timestamps();
+                }
 
                 $this->createHistoryReference($table, $view);
             });
