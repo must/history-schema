@@ -104,16 +104,16 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         $this->assertEquals(3, $testRecords[count($testRecords)-1]->id, 'User Id not right!');
     }
 
-    public function testRecordsPrevIdIsNullOnInsert()
+    public function testRecordsPreviousIdIsNullOnInsert()
     {
         $testRecords = DB::table('test')->get();
 
         foreach($testRecords as $testRecord) {
-            $this->assertNull($testRecord->prev_id, 'Prev_id is not null on record with Id: ' . $testRecord->id);
+            $this->assertNull($testRecord->previous_id, 'Previous_id is not null on record with Id: ' . $testRecord->id);
         }
     }
 
-    public function testRecordsPrevIdIsNotNullOnUpdate()
+    public function testRecordsPreviousIdIsNotNullOnUpdate()
     {
         DB::table('test')
             ->update(['text2_field' => DB::raw('text2_field || \' updated\'')]);
@@ -121,11 +121,11 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         $testRecords = DB::table('test')->get();
 
         foreach($testRecords as $testRecord) {
-            $this->assertNotNull($testRecord->prev_id, 'Prev_id is null on record with Id: ' . $testRecord->id . ' text2_field: ' . $testRecord->text2_field);
+            $this->assertNotNull($testRecord->previous_id, 'Previous_id is null on record with Id: ' . $testRecord->id . ' text2_field: ' . $testRecord->text2_field);
         }
     }
 
-    public function testRecordsPrevIdReferencesFirstOldOnUpdate()
+    public function testRecordsPreviousIdReferencesFirstOldOnUpdate()
     {
         $this->updateTestRecords();
 
@@ -136,19 +136,19 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         }
     }
 
-    public function testRecordsPrevIdReferencesFirstOldWithNullPrevIdAndNextIdOnUpdate()
+    public function testRecordsPreviousIdReferencesFirstOldWithNullPreviousIdAndNextIdOnUpdate()
     {
         $this->updateTestRecords();
 
         $testRecords = DB::table('test_history')->get();
 
         foreach($testRecords as $index => $testRecord) {
-            $this->assertNull($testRecord->prev_id, 'Prev_id not null on first history item');
+            $this->assertNull($testRecord->previous_id, 'Previous_id not null on first history item');
             $this->assertNull($testRecord->next_id, 'Next_id not null on first history item');
         }
     }
 
-    public function testRecordsPrevIdReferencesFirstOldWithOriginalIdEqualsIdOnUpdate()
+    public function testRecordsPreviousIdReferencesFirstOldWithOriginalIdEqualsIdOnUpdate()
     {
         $this->updateTestRecords();
 
@@ -159,7 +159,7 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         }
     }
 
-    public function testRecordsPrevIdReferencesFirstOldWithNotNullPrevIdAndNextIdOnTwoUpdates()
+    public function testRecordsPreviousIdReferencesFirstOldWithNotNullPreviousIdAndNextIdOnTwoUpdates()
     {
         $this->updateTestRecords(2);
 
@@ -168,7 +168,7 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
             ->get();
 
         foreach($testRecords as $index => $testRecord) {
-            $this->assertNotNull($testRecord->prev_id, 'Prev_id null on first history item');
+            $this->assertNotNull($testRecord->previous_id, 'Previous_id null on first history item');
             $this->assertNull($testRecord->next_id, 'Next_id not null on first history item');
         }
     }
@@ -186,7 +186,7 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         }
     }
 
-    public function testRecordsPrevIdReferencesFirstOldOnTwoUpdates()
+    public function testRecordsPreviousIdReferencesFirstOldOnTwoUpdates()
     {
         $this->updateTestRecords(2);
 
@@ -195,7 +195,7 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
             ->get();
 
         foreach($testRecords as $index => $testRecord) {
-            $this->assertEquals($testRecord->id-3, $testRecord->prev_id, 'Prev id of history record doesn\'t match the id');
+            $this->assertEquals($testRecord->id-3, $testRecord->previous_id, 'Prev id of history record doesn\'t match the id');
         }
     }
 

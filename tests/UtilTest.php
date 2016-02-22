@@ -10,7 +10,7 @@ class UtilTest extends \Orchestra\Testbench\TestCase
     private $historySchema;
     private $util;
 
-    private $fields = ['id', 'text1_field', 'text2_field', 'integer_field', 'created_at', 'updated_at', 'prev_id'];
+    private $fields = ['id', 'text1_field', 'text2_field', 'integer_field', 'created_at', 'updated_at', 'previous_id'];
 
     protected function getEnvironmentSetUp($app)
     {

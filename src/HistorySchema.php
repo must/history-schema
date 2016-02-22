@@ -34,14 +34,14 @@ class HistorySchema
                     OLD.id = NEXTVAL(quote_ident(TG_TABLE_NAME || '_history' || '_id_seq'));
                     
                     -- First time entring the history table? 
-                    IF (OLD.prev_id IS NULL) THEN
+                    IF (OLD.previous_id IS NULL) THEN
                         -- Let's get the original_id the same as the new OLD ID (Go figure :d)
                         original_id := OLD.id;
                     ELSE
                         -- Let's figure out the original id from the previous relevant record on the history table
                         EXECUTE 'SELECT original_id ' ||
                         'FROM ' || quote_ident(TG_TABLE_NAME || '_history') || ' ' ||
-                        'WHERE id = $1.prev_id'
+                        'WHERE id = $1.previous_id'
                         INTO original_id
                         USING OLD;
                     END IF;
@@ -56,10 +56,10 @@ class HistorySchema
                     EXECUTE 'UPDATE ' || quote_ident(TG_TABLE_NAME || '_history')
                         || ' SET next_id = $1'
                         || ' WHERE id = $2'
-                    USING insert_id, OLD.prev_id;
+                    USING insert_id, OLD.previous_id;
                     
                     -- Set the previous id to the new insert_id
-                    NEW.prev_id := insert_id;
+                    NEW.previous_id := insert_id;
 
                     return NEW;
                 ELSEIF (TG_OP = 'INSERT') THEN
@@ -94,9 +94,9 @@ class HistorySchema
      * @author Mustapha Ben Chaaben
      */
     private function createHistoryReference($table, $view) {
-        $table->integer('prev_id')->unsigned()->nullable();
+        $table->integer('previous_id')->unsigned()->nullable();
 
-        $table->foreign('prev_id')
+        $table->foreign('previous_id')
             ->references('id')->on($view . '_history')
             ->onDelete('cascade')
             ->onUpdate('cascade');
