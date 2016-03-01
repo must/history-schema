@@ -10,7 +10,7 @@ class UtilTest extends \Orchestra\Testbench\TestCase
     private $historySchema;
     private $util;
 
-    private $fields = ['id', 'text1_field', 'text2_field', 'integer_field', 'created_at', 'updated_at', 'previous_id'];
+    private $fields = ['id', 'previous_id', 'text1_field', 'text2_field', 'integer_field', 'created_at', 'updated_at'];
 
     protected function getEnvironmentSetUp($app)
     {
@@ -117,9 +117,19 @@ class UtilTest extends \Orchestra\Testbench\TestCase
     {
         $columns = DB::select('select get_columns_except(\'test\', ARRAY [\'id\', \'text1_field\'], \'t\') as s;');
         $columns = explode(',', $columns[0]->s);
+        
+        $expected = $this->fields;
+
+        if(($key = array_search('id', $expected)) !== false) {
+            unset($expected[$key]);
+        }
+
+        if(($key = array_search('text1_field', $expected)) !== false) {
+            unset($expected[$key]);
+        }
 
         $this->assertEquals(
-            $this->prepArrayForMatching(array_slice($this->fields, 2), 't.'),
+            $this->prepArrayForMatching($expected, 't.'),
             $this->prepArrayForMatching($columns),
             'Columns selected with exception expected and delivered don\'t match'
         );
@@ -142,7 +152,7 @@ class UtilTest extends \Orchestra\Testbench\TestCase
         $columns = DB::select('select get_columns_with_cutin(\'test\', \'integer_field\', ARRAY [\'test1\', \'test2\'], \'\') as s;');
         $columns = explode(',', $columns[0]->s);
         $fields = $this->fields;
-        array_splice($fields, 4, 0, [ 'test1', 'test2' ]);
+        array_splice($fields, 5, 0, [ 'test1', 'test2' ]);
         
         $this->assertEquals(
             $this->prepArrayForMatching($fields),
@@ -156,7 +166,7 @@ class UtilTest extends \Orchestra\Testbench\TestCase
         $columns = DB::select('select get_columns_with_cutin(\'test\', \'integer_field\', ARRAY [\'test1\', \'test2\', \'test3\'], \'\') as s;');
         $columns = explode(',', $columns[0]->s);
         $fields = $this->fields;
-        array_splice($fields, 4, 0, [ 'test1', 'test2', 'test3' ]);
+        array_splice($fields, 5, 0, [ 'test1', 'test2', 'test3' ]);
         
         $this->assertEquals(
             $this->prepArrayForMatching($fields),
@@ -170,7 +180,7 @@ class UtilTest extends \Orchestra\Testbench\TestCase
         $columns = DB::select('select get_columns_with_cutin(\'test\', \'integer_field\', ARRAY [\'pref.test1\', \'pref.test2\', \'pref.test3\'], \'pref\') as s;');
         $columns = explode(',', $columns[0]->s);
         $fields = $this->fields;
-        array_splice($fields, 4, 0, [ 'test1', 'test2', 'test3' ]);
+        array_splice($fields, 5, 0, [ 'test1', 'test2', 'test3' ]);
         
         $this->assertEquals(
             $this->prepArrayForMatching($fields, 'pref.'),

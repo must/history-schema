@@ -132,14 +132,6 @@ class HistorySchema
             \Schema::create($view . '_history', function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable, $timestamped) {
                 $table->increments('id');
 
-                if(! is_null($callable)) {
-                    call_user_func($callable, $table);
-                }
-                
-                if($timestamped) {
-                    $table->timestamps();
-                }
-
                 $this->createHistoryReference($table, $view);
                 $table->integer('next_id')->unsigned()->nullable();
                 $table->integer('original_id')->unsigned()->nullable();
@@ -155,12 +147,21 @@ class HistorySchema
 
                 $table->index('next_id');
                 $table->index('original_id');
+
+                if(! is_null($callable)) {
+                    call_user_func($callable, $table);
+                }
+                
+                if($timestamped) {
+                    $table->timestamps();
+                }
             });
 
             // Second of all we create the archived records table
             // It will be named following the views name (viewName_archived)
             \Schema::create($view . '_trash', function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable, $timestamped) {
                 $table->increments('id');
+                $this->createHistoryReference($table, $view);
 
                 if(! is_null($callable)) {
                     call_user_func($callable, $table);
@@ -170,13 +171,14 @@ class HistorySchema
                     $table->timestamps();
                 }
 
-                $this->createHistoryReference($table, $view);
             });
 
             // We create the actual view of data
             \Schema::create($view, function (\Illuminate\Database\Schema\Blueprint $table)  use ($view, $callable, $timestamped) {
                 $table->increments('id');
                 
+                $this->createHistoryReference($table, $view);
+
                 if(! is_null($callable)) {
                     call_user_func($callable, $table);
                 }
@@ -185,7 +187,6 @@ class HistorySchema
                     $table->timestamps();
                 }
 
-                $this->createHistoryReference($table, $view);
             });
 
             // Create the trigger
