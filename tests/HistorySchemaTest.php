@@ -1,7 +1,7 @@
 <?php
 
 use Visionerp\HistorySchema\HistorySchema;
-
+use Visionerp\HistorySchema\Util;
 
 
 class HistorySchemaTest extends \Orchestra\Testbench\TestCase
@@ -50,6 +50,10 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         });
 
         $this->insertThreeRecords('test');
+
+        $util = new Util();
+
+        $util->createGetAllColumnsExceptProcedure();
     }
 
     public function tearDown()
@@ -212,6 +216,12 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         }
     }
 
+    /**
+     * Tests the record count on hiustory table table after delete
+     *
+     * @return void
+     * @author Mustapha Ben Chaaben
+     **/
     public function testRecordsCountOnDelete()
     {
         DB::table('test')->delete();
@@ -221,6 +231,12 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         $this->assertEquals(0, $count, 'Records count doesn\'t match number of users created!');
     }
 
+    /**
+     * Tests the delete method on history table
+     *
+     * @return void
+     * @author Mustapha Ben Chaaben
+     **/
     public function testTrashRecordsCountOnDelete()
     {
         DB::table('test')->delete();
@@ -228,6 +244,33 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         $count = DB::table('test_trash')->count();
 
         $this->assertEquals(3, $count, 'Trashed records count doesn\'t match number of users created!');
+    }
+
+    /**
+     * Tests the alter table method
+     *
+     * @return void
+     * @author Mustapha Ben Chaaben
+     **/
+    public function testInsertOnAlteredTableByAddingColumn()
+    {
+        $this->historySchema->table('test', function(\Illuminate\Database\Schema\Blueprint $table) {
+            $table->string('added_field')->nullable();
+        });
+
+        $columns = DB::select('select get_columns_except(\'test\', ARRAY [\'id\'], \'t\') as s;');
+        //dd($columns);
+        $this->insertThreeRecords();
+
+        DB::table('test')
+            ->update(['added_field' => 'added']);
+
+        $testRecords = DB::table('test')
+            ->get();
+
+        foreach($testRecords as $index => $testRecord) {
+            $this->assertEquals('added', $testRecord->added_field, 'Added field problem on test table!');
+        }
     }
 
 }

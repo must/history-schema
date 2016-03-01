@@ -125,4 +125,16 @@ class UtilTest extends \Orchestra\Testbench\TestCase
         );
     }
 
+    public function testColumnsMatchInitialTableStructureWithoutPrefix()
+    {
+        $columns = DB::select('select get_columns_except(\'test\', ARRAY []::TEXT[], \'\') as s;');
+        $columns = explode(',', $columns[0]->s);
+        
+        $this->assertEquals(
+            $this->prepArrayForMatching($this->fields, ''),
+            $this->prepArrayForMatching($columns),
+            'Columns selected with exception expected and delivered don\'t match. This is with no prefix!'
+        );
+    }
+
 }
