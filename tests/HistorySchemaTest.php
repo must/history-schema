@@ -259,7 +259,7 @@ class HistorySchemaTest extends \Orchestra\Testbench\TestCase
         });
 
         $columns = DB::select('select get_columns_except(\'test\', ARRAY [\'id\'], \'t\') as s;');
-        //dd($columns);
+        
         $this->insertThreeRecords();
 
         DB::table('test')

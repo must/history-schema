@@ -137,4 +137,46 @@ class UtilTest extends \Orchestra\Testbench\TestCase
         );
     }
 
+    public function testColumnsMatchInitialTableStructureWithCutin()
+    {
+        $columns = DB::select('select get_columns_with_cutin(\'test\', \'integer_field\', ARRAY [\'test1\', \'test2\'], \'\') as s;');
+        $columns = explode(',', $columns[0]->s);
+        $fields = $this->fields;
+        array_splice($fields, 4, 0, [ 'test1', 'test2' ]);
+        
+        $this->assertEquals(
+            $this->prepArrayForMatching($fields),
+            $this->prepArrayForMatching($columns),
+            'Columns selected with exception expected and delivered don\'t match. This is with no prefix!'
+        );
+    }
+
+    public function testColumnsMatchInitialTableStructureWithCutin2()
+    {
+        $columns = DB::select('select get_columns_with_cutin(\'test\', \'integer_field\', ARRAY [\'test1\', \'test2\', \'test3\'], \'\') as s;');
+        $columns = explode(',', $columns[0]->s);
+        $fields = $this->fields;
+        array_splice($fields, 4, 0, [ 'test1', 'test2', 'test3' ]);
+        
+        $this->assertEquals(
+            $this->prepArrayForMatching($fields),
+            $this->prepArrayForMatching($columns),
+            'Columns selected with exception expected and delivered don\'t match. This is with no prefix!'
+        );
+    }
+
+    public function testColumnsMatchInitialTableStructureWithCutinWithPrefix()
+    {
+        $columns = DB::select('select get_columns_with_cutin(\'test\', \'integer_field\', ARRAY [\'pref.test1\', \'pref.test2\', \'pref.test3\'], \'pref\') as s;');
+        $columns = explode(',', $columns[0]->s);
+        $fields = $this->fields;
+        array_splice($fields, 4, 0, [ 'test1', 'test2', 'test3' ]);
+        
+        $this->assertEquals(
+            $this->prepArrayForMatching($fields, 'pref.'),
+            $this->prepArrayForMatching($columns),
+            'Columns selected with exception expected and delivered don\'t match. This is with no prefix!'
+        );
+    }
+
 }
