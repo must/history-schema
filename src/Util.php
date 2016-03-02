@@ -12,7 +12,7 @@ class Util
      **/
     public function createGetAllColumnsExceptProcedure()
     {
-        \DB::unprepared(file_get_contents('SQL/get_columns_except_function.sql'));
+        \DB::unprepared(file_get_contents(realpath(dirname ( __FILE__ ) . '/SQL/get_columns_except_function.sql')));
     }
 
     /**
@@ -36,7 +36,7 @@ class Util
     {
         $this->createGetAllColumnsExceptProcedure();
 
-        \DB::unprepared(file_get_contents('SQL/get_columns_with_cutin_function.sql'));
+        \DB::unprepared(file_get_contents(realpath(dirname ( __FILE__ ) . '/SQL/get_columns_with_cutin_function.sql')));
     }
 
     /**
