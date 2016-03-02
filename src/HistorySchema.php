@@ -51,7 +51,7 @@ class HistorySchema
         } 
 
         // The procedure to execture on trigger
-        \DB::unprepared(file_get_contents('SQL/view_insert_update_delete_trigger.sql'));
+        \DB::unprepared(file_get_contents(realpath(dirname ( __FILE__ ) . '/SQL/view_insert_update_delete_trigger.sql')));
     }
 
     /**
